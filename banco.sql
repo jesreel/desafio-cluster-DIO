@@ -1,8 +1,6 @@
-CREATE TABLE dados (
-    AlunoID int,
-    Nome varchar(50),
-    Sobrenome varchar(50),
-    Endereco varchar(150),
-    Cidade varchar(50),
-    Host varchar(50)
+CREATE TABLE acessos (
+    id integer not null auto_increment,
+    datahora varchar(20),
+    host varchar(20),
+    so varchar(10)
 );
