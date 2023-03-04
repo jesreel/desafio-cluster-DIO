@@ -1,46 +1,63 @@
 <html>
 
 <head>
-<title>Exemplo PHP</title>
+<title>Projeto Docker</title>
 </head>
 <body>
 
 <?php
-ini_set("display_errors", 1);
-header('Content-Type: text/html; charset=iso-8859-1');
 
 
-
-echo 'Versao Atual do PHP: ' . phpversion() . '<br>';
-
-$servername = "54.234.153.24";
-$username = "root";
-$password = "Senha123";
-$database = "meubanco";
-
-// Criar conexão
+//Mostrar versão do PHP
+echo "Versao Atual do PHP: ".phpversion()."<br><br>";
 
 
-$link = new mysqli($servername, $username, $password, $database);
+// Incluindo a conexão
+include("conexao.php");
 
-/* check connection */
-if (mysqli_connect_errno()) {
-    printf("Connect failed: %s\n", mysqli_connect_error());
-    exit();
+
+// Identificando o SO de acesso
+if(strpos($_SERVER['HTTP_USER_AGENT'],"Windows")) {
+	$so = "Windows";
+}
+elseif(strpos($_SERVER['HTTP_USER_AGENT'],"Linux")) {
+	$so = "Linux";
+}
+else {
+	$so = "Outros";
 }
 
-$valor_rand1 =  rand(1, 999);
-$valor_rand2 = strtoupper(substr(bin2hex(random_bytes(4)), 1));
-$host_name = gethostname();
 
 
-$query = "INSERT INTO dados (AlunoID, Nome, Sobrenome, Endereco, Cidade, Host) VALUES ('$valor_rand1' , '$valor_rand2', '$valor_rand2', '$valor_rand2', '$valor_rand2','$host_name')";
+//dados para o insert
+$dados = [
+	'id'		=> null,
+	'datahora'	=> date("d/m/Y H:i:s"),
+	'host'		=> $_SERVER['REMOTE_ADDR'],
+	'so'		=> $so
+];
+
+$sql = "INSERT INTO acessos(id, datahora, host, so) VALUES (:id, :datahora, :host, :so)";
 
 
-if ($link->query($query) === TRUE) {
-  echo "New record created successfully";
-} else {
-  echo "Error: " . $link->error;
+
+//Transação
+try {
+	
+	$pdo->beginTransaction();
+		$insert = $pdo->prepare($sql);
+		$insert->execute($dados);
+	$pdo->commit();
+	
+	echo "Dados Salvos com Sucesso!<br>";
+	
+}
+catch(PDOExceptio $e) {
+	
+	$pdo->rollback();
+	$erro = $e->getMessage();
+	
+	echo $erro;
 }
 
 ?>
